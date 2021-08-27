@@ -1,4 +1,4 @@
-# McFont
+# BitmapFontConverter
 
 マインクラフトのassetのビットマップフォントデータを**ttf**(基本的なフォントファイル)/**woff**(webフォント用のフォントファイル)に変換するツール。
 
