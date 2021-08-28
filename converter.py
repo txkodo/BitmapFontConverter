@@ -1,17 +1,7 @@
+from sub.sipnner import Spinner
 from sub.mcFont import McFont
 from pathlib import Path
 import sys
-
-def spinner_gen():
-    while 1:
-        yield '|'
-        yield '/'
-        yield '-'
-        yield '\\'
-
-if __name__ == '__main__':
-    for spinner in spinner_gen():
-        print(spinner + '\033[1D', end='', file=sys.stderr)
 
 def convert(fontJsonPath:str,genTTf:bool=True,genWOFF:bool=False,name:str='BitmapMc'):
   if not (genTTf or genWOFF): return
@@ -21,10 +11,10 @@ def convert(fontJsonPath:str,genTTf:bool=True,genWOFF:bool=False,name:str='Bitma
   mcFont.generate(jsonPath,assetsPath)
   if genTTf:
     print('ttfを生成しています')
-    mcFont.exportTTF()
+    Spinner(mcFont.exportTTF)()
   if genWOFF:
     print('woffを生成しています')
-    mcFont.exportWoff()
+    Spinner(mcFont.exportWoff)()
 
 if __name__ == '__main__':
 
@@ -50,3 +40,4 @@ if __name__ == '__main__':
 ### スクリプトから実行する場合
 #   # <path>は次のようなパスになる：C:.../assets/<namespace>/font/<fontname>.json
 #   convert('<path>',genTTf=True,genWOFF=False,name:str='BitmapMc')
+
