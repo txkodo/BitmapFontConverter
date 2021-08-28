@@ -2,8 +2,6 @@ import numpy
 from sub.graph import DotGridGraph
 from PIL.Image import Image
 import defcon
-from defcon.objects.font import Font
-from defcon.objects.glyph import Glyph
 
 def unpackArg(func):
   def inner(self,arg):

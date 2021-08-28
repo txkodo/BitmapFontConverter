@@ -22,8 +22,12 @@ if __name__ == '__main__':
       convert(jsonPath)
     except Exception as e:
       print(e)
+      input('変換時にエラーが発生しました')
+      print('閉じるには何かキーを押してください')
       raise e
-    input()
+      input()
+    input('変換が正常に終了しました')
+    input('閉じるには何かキーを押してください')
 
 ### スクリプトから実行する場合
 #   # <path>は次のようなパスになる：C:.../assets/<namespace>/font/<fontname>.json
