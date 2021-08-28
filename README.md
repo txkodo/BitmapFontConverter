@@ -14,7 +14,7 @@
   - pillow `$ pip install Pillow`
   - fonttools  `$ pip install fonttools`
   - ufo2ft `$ pip install ufo2ft`
-  - defcon `$ pip install de [MinecraftBitmap.ttf](MinecraftBitmap.ttf) fcon`
+  - defcon `$ pip install defcon`
 
   
 
