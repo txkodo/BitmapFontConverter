@@ -24,10 +24,11 @@ if __name__ == '__main__':
       print(e)
       input('変換時にエラーが発生しました')
       print('閉じるには何かキーを押してください')
-      raise e
       input()
-    input('変換が正常に終了しました')
-    input('閉じるには何かキーを押してください')
+      raise e
+    print('変換が正常に終了しました')
+    print('閉じるには何かキーを押してください')
+    input()
 
 ### スクリプトから実行する場合
 #   # <path>は次のようなパスになる：C:.../assets/<namespace>/font/<fontname>.json

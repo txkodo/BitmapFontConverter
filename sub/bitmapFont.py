@@ -1,3 +1,4 @@
+import multiprocessing
 from pathlib import Path
 from defcon.objects.contour import Contour
 
@@ -46,8 +47,9 @@ class BitmapFont:
     chars = ( char for string in self.chars for char in string)
     multiProcessArgs = ((matrix,self.bitmap[x,y]) for y,string in enumerate(self.chars) for x in range(len(string)))
 
-    p = Pool(-1)
-    return dict(zip(chars,p.map(McGlyph,multiProcessArgs)))
+    with Pool(None) as p:
+      result = dict(zip(chars,p.map(McGlyph,multiProcessArgs)))
+    return result
 
 class LegacyUnicodeFont:
   def __init__(self,assets:Path,sizes:str,template:str) -> None:
@@ -70,8 +72,9 @@ class LegacyUnicodeFont:
       # TODO: Matrixのピクセル数による補正
       multiProcessArgs += ((matrix,bitmap[x,y],self.sizes[codePoint(i,y,x)])for y in range(16) for x in range(16))
 
-    p = Pool(-1)
-    return dict(zip(chars,p.map(McGlyph,multiProcessArgs)))
+    with Pool(None) as p:
+      result = dict(zip(chars,p.map(McGlyph,multiProcessArgs)))
+    return result
 
 class FontBitmaps:
   def __init__(self,assets:Path,providers:list[dict],matrix:tuple[int,int,int,int,int,int]) -> None:
@@ -102,8 +105,8 @@ class FontBitmaps:
     assert self.state == 'generated'
     self.state = 'calculated'
 
-    p = Pool(-1)
-    glypheDatas = p.map(McGlyph.export,self.imgMap.values())
+    with Pool(None) as p:
+      glypheDatas = p.map(McGlyph.export,self.imgMap.values())
 
     def genGlyph(char:str,contours:list[Contour],width:int):
       glyph:Glyph = font.newGlyph(str(ord(char)))
