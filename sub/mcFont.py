@@ -6,12 +6,12 @@ import defcon
 import json
 
 class McFont:
-  def __init__(self) -> None:
-    self.fontname = 'BitmapMc'
+  def __init__(self,name:str) -> None:
+    self.fontname = name
     font = defcon.Font()
 
     # フォント名、基本メトリックの設定
-    font.info.familyName = 'BitmapMc'
+    font.info.familyName = name.replace(' ','')
     font.info.unitsPerEm = 128
     font.info.descender = -16
     font.info.ascender = 112

@@ -2,16 +2,14 @@ from sub.mcFont import McFont
 from pathlib import Path
 import sys
 
-
-def convert(fontJsonPath:str,genTTf=True,genWOFF=False):
+def convert(fontJsonPath:str,genTTf:bool=True,genWOFF:bool=False,name:str='BitmapMc'):
   if not (genTTf or genWOFF): return
-  mcFont = McFont()
+  mcFont = McFont(name)
   jsonPath = Path(fontJsonPath)
   assetsPath = jsonPath.parent.parent.parent
   mcFont.generate(jsonPath,assetsPath)
   if genTTf: mcFont.exportTTF()
   if genWOFF: mcFont.exportWoff()
-
 
 if __name__ == '__main__':
 
@@ -29,5 +27,4 @@ if __name__ == '__main__':
 
 ### スクリプトから実行する場合
 #   # <path>は次のようなパスになる：C:.../assets/<namespace>/font/<fontname>.json
-#   convert('<path>',genTTf=True,genWOFF=False)
-  
+#   convert('<path>',genTTf=True,genWOFF=False,name:str='BitmapMc')
