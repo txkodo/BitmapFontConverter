@@ -1,8 +1,8 @@
 /assets/
 /fontcheck.html
 /test.py
-/sample.ttf
-/sample.woff
+/promotion.txt
+
 __pycache__/
 *.ttf
 *.woff
