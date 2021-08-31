@@ -30,7 +30,6 @@ class BitmapGlyphs:
     self.img = alpha.convert('1')
     self.width = self.img.width
     self.height = self.img.height
-    print(self.width , columnCount)
     self.w_unit = self.width // columnCount
     self.h_unit = self.height// rowCount
     self.scale  = height/self.h_unit/8
@@ -85,7 +84,7 @@ class LegacyUnicodeFont:
     def codePoint(i,y,x):return 16**2*i+16*y+x
     for i in range(16**2):
       if not self.template(f'{i:02X}').exists():continue
-      bitmap = BitmapGlyphs(self.template(f'{i:02X}'),16,16)
+      bitmap = BitmapGlyphs(self.template(f'{i:02X}'),16,16,16)
       chars += (chr(codePoint(i,y,x)) for y in range(16) for x in range(16))
       # TODO: Matrixのピクセル数による補正
       multiProcessArgs += ((matrix,bitmap[x,y],self.sizes[codePoint(i,y,x)])for y in range(16) for x in range(16))

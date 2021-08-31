@@ -39,5 +39,5 @@ if __name__ == '__main__':
 
 ## スクリプトから実行する場合
   # <path>は次のようなパスになる：C:.../assets/<namespace>/font/<fontname>.json
-  convert(r'.\assets\minecraft\font\test.json',genTTf=True,genWOFF=False,name='BitmapMc')
+  # convert(r'.\assets\minecraft\font\default.json',genTTf=True,genWOFF=False,name='BitmapMc')
 
