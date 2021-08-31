@@ -1,32 +1,32 @@
-import threading
+import itertools
 import time
 import sys
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any
+from typing import TypeVar
 
-class Spinner:
-  def __init__(self,func) -> None:
-    self.done = False
-    self.func = func
+T = TypeVar('T')
+def spinner(func:T):
+  running = True
 
-  def spinner(self):
-    chars = r'/-\|'
-    while not self.done:
-      for char in chars:
-        sys.stdout.write( '\b' + char)
-        sys.stdout.flush()
-        time.sleep(0.12)
-    sys.stdout.write('\b' + ' ' )  # 最後に末尾1文字を空白で書き換える
+  # runningの間ぐるぐるを表示する
+  def spin():
+    chars = itertools.cycle(r'/-\|')
+    while running:
+      sys.stdout.write( '\b' + next(chars))
+      sys.stdout.flush()
+      time.sleep(0.2)
+    sys.stdout.write('\b')
     sys.stdout.flush()
 
-
-  def __call__(self, *args: Any, **kwds: Any) -> Any:
-    return self.run(*args, **kwds)
-
-  def run(self, *args: Any, **kwds: Any) -> Any:
+  pallarel:T
+  # 並列処理
+  def pallarel(*arg,**kwarg):
+    nonlocal running
     with ThreadPoolExecutor(2) as executor:
-      executor.submit(self.spinner)
-      future = executor.submit(self.func, *args, **kwds)
+      executor.submit(spin)
+      future = executor.submit(func, *arg, **kwarg)
       result = future.result()
-      self.done = True
+      running = False
     return result
+
+  return pallarel

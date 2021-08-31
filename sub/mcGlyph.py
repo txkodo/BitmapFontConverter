@@ -57,11 +57,10 @@ class McGlyph:
     assert self.state == 'calculated'
     self.state = 'operated'
     a,b,c,d,dx,dy = self.matrix
-    height = self.img.height
 
     def operate(coord:tuple[int,int]):
       x,y = coord
-      return [a*x//height+b*y//height+dx,c*x//height+d*y//height+dy]
+      return [a*x+b*y+dx,c*x+d*y+dy]
 
     p01 = operate((self.width,0))
     p10 = operate((0,self.height))

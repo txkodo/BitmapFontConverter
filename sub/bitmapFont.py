@@ -23,28 +23,37 @@ class GlyphSizes:
     return split(self.binary[index])
 
 class BitmapGlyphs:
-  def __init__(self,path:Path,splitCount:int) -> None:
+  def __init__(self,path:Path,columnCount:int,rowCount:int,height:int) -> None:
     # 二値化されたbitmap
     img:Image.Image = Image.open(path).convert('RGBA')
     _,_,_,alpha =img.split()
     self.img = alpha.convert('1')
     self.width = self.img.width
     self.height = self.img.height
-    self.unit = self.width // splitCount
+    print(self.width , columnCount)
+    self.w_unit = self.width // columnCount
+    self.h_unit = self.height// rowCount
+    self.scale  = height/self.h_unit/8
 
   def __getitem__(self,coord:tuple[int,int]):
     x,y = coord
-    return self.img.crop((x*self.unit,y*self.unit,(x+1)*self.unit,(y+1)*self.unit))
+    return self.img.crop((x*self.w_unit,y*self.h_unit,(x+1)*self.w_unit,(y+1)*self.h_unit))
 
 class BitmapFont:
-  def __init__(self,assets:Path,filepath:str,ascent:int,chars:list[str]) -> None:
+  def __init__(self,assets:Path,filepath:str,height:int,ascent:int,chars:list[str]) -> None:
     namespace,filepath = filepath.split(':')
     filepath = assets/namespace/'textures'/filepath
-    self.bitmap = BitmapGlyphs(filepath,len(chars[0]))
-    self.ascent = ascent
+    self.bitmap = BitmapGlyphs(filepath,len(chars[0]),len(chars),height)
+    self.ascentRate = ascent/8
+    self.width  = self.bitmap.w_unit
+    self.height = self.bitmap.h_unit
+    self.scale  = self.bitmap.scale
+
     self.chars = chars
 
   def genImgMap(self,matrix):
+    a,b,c,d,e,f = matrix
+    matrix = (int(a*self.scale),int(b*self.scale),int(c*self.scale),int(d*self.scale),e,f-int(d*self.ascentRate))
 
     chars = ( char for string in self.chars for char in string)
     multiProcessArgs = ((matrix,self.bitmap[x,y]) for y,string in enumerate(self.chars) for x in range(len(string)))
@@ -61,19 +70,26 @@ class LegacyUnicodeFont:
     sizesNamespace,sizesPath = sizes.split(':')
     sizesPath = assets/sizesNamespace/sizesPath
     self.sizes = GlyphSizes(sizesPath.read_bytes())
-
+    
+    self.ascentRate = 7/8
+    self.width  = 16
+    self.height = 16
+    self.scale  = 1/16
 
   def genImgMap(self,matrix):
+    a,b,c,d,e,f = matrix
+    matrix = (int(a*self.scale),int(b*self.scale),int(c*self.scale),int(d*self.scale),e,f-int(d*self.ascentRate))
+
     multiProcessArgs = []
     chars = []
     def codePoint(i,y,x):return 16**2*i+16*y+x
     for i in range(16**2):
       if not self.template(f'{i:02X}').exists():continue
-      bitmap = BitmapGlyphs(self.template(f'{i:02X}'),16)
+      bitmap = BitmapGlyphs(self.template(f'{i:02X}'),16,16)
       chars += (chr(codePoint(i,y,x)) for y in range(16) for x in range(16))
       # TODO: Matrixのピクセル数による補正
       multiProcessArgs += ((matrix,bitmap[x,y],self.sizes[codePoint(i,y,x)])for y in range(16) for x in range(16))
-    
+
     with Pool(None) as p:
       result = dict(zip(chars,p.map(McGlyph,multiProcessArgs)))
     return result
@@ -89,7 +105,8 @@ class FontBitmaps:
 
   def _loadProvider(self,provider:dict[str,Union[str,int]]):
     if provider['type'] == 'bitmap':
-      return BitmapFont(self.assets,provider['file'],provider['ascent'],provider['chars'])
+      height = provider['height'] if 'height' in provider else 8
+      return BitmapFont(self.assets,provider['file'],height,provider['ascent'],provider['chars'])
 
     if provider['type'] == 'legacy_unicode':
       return LegacyUnicodeFont(self.assets,provider['sizes'],provider['template'])
@@ -114,7 +131,7 @@ class FontBitmaps:
     print('ビットマップを変換しています')
     with tqdm(total=self.length) as t:
       with Pool(os.cpu_count()-1) as p:
-        for result in p.map(McGlyph.export,self.imgMap.values()):
+        for result,k in zip(p.map(McGlyph.export,self.imgMap.values()),self.imgMap.keys()):
           glypheDatas.append(result)
           t.update(1)
 
@@ -130,8 +147,6 @@ class FontBitmaps:
       # \u0000は別途指定、\uFFFFと\uFFFEは無効?であるため除外
       if char not in b'\ufffe\uffff'.decode('unicode-escape'):
         if contours:
-          if char == b'\u0020'.decode('unicode-escape'):
-            print(contours)
           genGlyph(char,contours,width)
         else:
           glyph:Glyph = font.newGlyph('cid00001')

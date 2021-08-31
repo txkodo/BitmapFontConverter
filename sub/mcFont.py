@@ -24,7 +24,7 @@ class McFont:
   
   def generate(self,jsonPath:Path,assetPath:Path):
     providers = json.loads(jsonPath.read_text())['providers']
-    fb = FontBitmaps(assetPath,providers,(128,0,0,-128,8,112))
+    fb = FontBitmaps(assetPath,providers,(128,0,0,-128,8,0))
     fb.export(self.font)
 
   def exportTTF(self):
