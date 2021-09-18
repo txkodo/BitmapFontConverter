@@ -1,3 +1,4 @@
+from defcon.objects.contour import Contour
 import numpy
 from sub.graph import DotGridGraph
 from PIL.Image import Image
@@ -18,7 +19,7 @@ class McGlyph:
     self.img = img
     self.state = 'init'
 
-  def export(self):
+  def export(self) -> tuple[list[Contour], int]:
     self._calculate()
     self._operateMatrix()
     return self._exportContours()

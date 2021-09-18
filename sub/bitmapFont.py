@@ -100,7 +100,7 @@ class FontBitmaps:
     self.providers = [ self._loadProvider(provider) for provider in tqdm(reversed(providers),total = len(providers) ) ]
     self.state = 'init'
     self._genImages(matrix)
-    self.length = len(self.imgMap)
+    self.length = len(self.mcglyphs)
 
   def _loadProvider(self,provider:dict[str,Union[str,int]]):
     if provider['type'] == 'bitmap':
@@ -114,11 +114,11 @@ class FontBitmaps:
   def _genImages(self,matrix):
     assert self.state == 'init'
     self.state = 'generated'
-    imgMap:dict[str,McGlyph] = {}
+    mcglyphmap:dict[str,McGlyph] = {} 
     print('フォントファイルを取得しています')
     for provider in tqdm(self.providers):
-      imgMap |= provider.genImgMap(matrix)
-    self.imgMap = imgMap
+      mcglyphmap.update(provider.genImgMap(matrix))
+    self.mcglyphs = mcglyphmap.values()
 
   def export(self,font:Font):
 
@@ -128,11 +128,11 @@ class FontBitmaps:
     glypheDatas:list[tuple[list[Contour], int]] = []
     # プログレスバーを表示させつつマルチスレッド処理
     print('ビットマップを変換しています')
-    # with tqdm(total=self.length) as t:
-    with Pool(os.cpu_count()-1) as p:
-      for result,k in zip(p.map(McGlyph.export,self.imgMap.values()),self.imgMap.keys()):
-        glypheDatas.append(result)
-          # t.update(1)
+    with tqdm(total=self.length) as t:
+      with Pool(os.cpu_count()) as p:
+        for result in p.map(McGlyph.export,self.mcglyphs):
+          glypheDatas.append(result)
+          t.update(1)
 
     def genGlyph(char:str,contours:list[Contour],width:int):
       glyph:Glyph = font.newGlyph(str(ord(char)))
@@ -142,8 +142,9 @@ class FontBitmaps:
         glyph.appendContour(contour)
     
     print('フォントに文字を登録しています')
-    for char,(contours,width) in tqdm(zip(self.imgMap.keys(),glypheDatas),total=self.length):
+    for mcglyph,(contours,width) in tqdm(zip(self.mcglyphs,glypheDatas),total=self.length):
       # \u0000は別途指定、\uFFFFと\uFFFEは無効?であるため除外
+      char = mcglyph.char
       if char not in b'\ufffe\uffff'.decode('unicode-escape'):
         if contours:
           genGlyph(char,contours,width)
