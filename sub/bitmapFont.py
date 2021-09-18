@@ -55,7 +55,7 @@ class BitmapFont:
     matrix = (int(a*self.scale),int(b*self.scale),int(c*self.scale),int(d*self.scale),e,f-int(d*self.ascentRate))
 
     chars = ( char for string in self.chars for char in string)
-    multiProcessArgs = ((matrix,self.bitmap[x,y]) for y,string in enumerate(self.chars) for x in range(len(string)))
+    multiProcessArgs = ((string[x],matrix,self.bitmap[x,y]) for y,string in enumerate(self.chars) for x in range(len(string)))
 
     with Pool(None) as p:
       result = dict(zip(chars,p.map(McGlyph,multiProcessArgs)))
@@ -87,7 +87,7 @@ class LegacyUnicodeFont:
       bitmap = BitmapGlyphs(self.template(f'{i:02X}'),16,16,16)
       chars += (chr(codePoint(i,y,x)) for y in range(16) for x in range(16))
       # TODO: Matrixのピクセル数による補正
-      multiProcessArgs += ((matrix,bitmap[x,y],self.sizes[codePoint(i,y,x)])for y in range(16) for x in range(16))
+      multiProcessArgs += ((chr(codePoint(i,y,x)),matrix,bitmap[x,y],self.sizes[codePoint(i,y,x)])for y in range(16) for x in range(16) if self.sizes[codePoint(i,y,x)] != (0,0))
 
     with Pool(None) as p:
       result = dict(zip(chars,p.map(McGlyph,multiProcessArgs)))
@@ -128,11 +128,11 @@ class FontBitmaps:
     glypheDatas:list[tuple[list[Contour], int]] = []
     # プログレスバーを表示させつつマルチスレッド処理
     print('ビットマップを変換しています')
-    with tqdm(total=self.length) as t:
-      with Pool(os.cpu_count()-1) as p:
-        for result,k in zip(p.map(McGlyph.export,self.imgMap.values()),self.imgMap.keys()):
-          glypheDatas.append(result)
-          t.update(1)
+    # with tqdm(total=self.length) as t:
+    with Pool(os.cpu_count()-1) as p:
+      for result,k in zip(p.map(McGlyph.export,self.imgMap.values()),self.imgMap.keys()):
+        glypheDatas.append(result)
+          # t.update(1)
 
     def genGlyph(char:str,contours:list[Contour],width:int):
       glyph:Glyph = font.newGlyph(str(ord(char)))

@@ -11,7 +11,8 @@ def unpackArg(func):
 class McGlyph:
   
   @unpackArg
-  def __init__(self:'McGlyph',matrix:tuple[int,int,int,int,int,int],img:Image,domain:tuple[int,int]=None) -> None:
+  def __init__(self:'McGlyph',char:str,matrix:tuple[int,int,int,int,int,int],img:Image,domain:tuple[int,int]=None) -> None:
+    self.char = char
     self.matrix = matrix
     self.domain = domain
     self.img = img
@@ -28,7 +29,11 @@ class McGlyph:
     img = self.img if self.domain is None else self.img.crop((self.domain[0],0,self.domain[1],self.img.height))
 
     gridGlaph = DotGridGraph(img.width,img.height)
+    # try:
     imgArray = numpy.asarray(img)
+    # except SystemError as e:
+    #   print(f'>>>{self.char}<<<::{ord(self.char):0x}::{(self.domain[0],0,self.domain[1],self.img.height)}\n')
+    #   raise e
 
     x,y = 0,0
     for x in range(img.width):
