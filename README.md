@@ -15,6 +15,8 @@
   - fonttools  `$ pip install fonttools`
   - ufo2ft `$ pip install ufo2ft`
   - defcon `$ pip install defcon`
+  - numpy `$ pip install numpy`
+  - tqdm `$ pip install tqdm`
 
   
 
