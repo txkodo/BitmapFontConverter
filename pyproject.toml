@@ -1,0 +1,14 @@
+[project]
+name = "bitmapfontconverter"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "defcon>=0.10.3",
+    "fonttools>=4.55.3",
+    "numpy>=2.0.2",
+    "pillow>=11.1.0",
+    "tqdm>=4.67.1",
+    "ufo2ft>=3.3.1",
+]
